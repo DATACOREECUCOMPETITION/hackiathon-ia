@@ -19,9 +19,7 @@ historial_emergencias: Registro en tiempo real de los estados de triaje y audito
 Para garantizar una disponibilidad del 99.9% en situaciones críticas de salud, se integró un sistema de contingencia en cascada que conmuta dinámicamente entre tres instancias de LLMs:
 
 Gemini 2.5 Flash (Instancia Principal)
-
-Gemini 2.5 Flash (Respaldo de Alta Capacidad)
-
+Gemini 2.5 Flash (Respaldo Contingencia)
 Gemini 2.5 Flash (Segunda Contingencia)
 
 
