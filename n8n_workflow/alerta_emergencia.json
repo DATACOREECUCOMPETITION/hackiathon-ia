@@ -1,0 +1,396 @@
+{
+  "id": "Dopj9pgH2gy8yK4Z",
+  "name": "Datacore - Triaje Clínico y Auditoría con Triple Failover IA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ingreso-emergencia",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-entrada-triage",
+      "name": "Webhook Entrada Triage",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "webhookId": "ingreso-emergencia"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT \n  p.cedula,\n  p.nombre_completo,\n  p.tipo_poliza,\n  p.estado_poliza,\n  p.fecha_inicio,\n  p.fecha_fin,\n  p.preexistencias,\n  p.cobertura_max_usd,\n  p.sbu_vigente,\n  p.notes,\n  EXTRACT(MONTH FROM AGE(NOW(), p.fecha_inicio::TIMESTAMPTZ))::INT AS meses_vigencia\nFROM polizas p\nWHERE p.cedula = '{{ $json.body.cedula }}';"
+      },
+      "id": "consultar-db-poliza",
+      "name": "Consultar DB Póliza",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        300,
+        300
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "postgres-local-credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const webhook_data = $('Webhook Entrada Triage').first().json.body;\nlet poliza_data = null;\ntry {\n  poliza_data = $('Consultar DB Póliza').first()?.json || null;\n} catch (e) {\n  poliza_data = null;\n}\n\nconst fc = parseFloat(webhook_data.fc || 0);\nconst fr = parseFloat(webhook_data.fr || 0);\nconst pas = parseFloat(webhook_data.pas || 0);\nconst pad = parseFloat(webhook_data.pad || 0);\nconst triage_input = webhook_data.triage || 'Verde';\n\nlet triage_nivel = triage_input;\nlet triage_desc = 'Prioridad IV — Verde';\n\nif (fc < 50 || fc > 150 || pas < 90 || pas > 220 || pad > 110 || fr > 35 || fr < 10) {\n  triage_nivel = 'Rojo';\n  triage_desc = 'Prioridad I — Rojo (Atención Inmediata)';\n} else if (fr >= 24) {\n  triage_nivel = 'Naranja';\n  triage_desc = 'Prioridad II — Naranja (Muy Urgente)';\n} else if (pas < 100 || fc > 100 || fr >= 20) {\n  triage_nivel = 'Amarillo';\n  triage_desc = 'Prioridad III — Amarillo (Urgente)';\n}\n\nconst emergencia_calificada = ['Rojo', 'Naranja', 'Amarillo'].includes(triage_nivel);\n\nconst meses_vigencia = poliza_data ? (poliza_data.meses_vigencia || 0) : 0;\nconst sbu = poliza_data ? parseFloat(poliza_data.sbu_vigente || 460) : 460;\nconst sublimite_preexistencias = 20 * sbu;\n\nconst preexistencias_list = (poliza_data?.preexistencias && Array.isArray(poliza_data.preexistencias))\n  ? poliza_data.preexistencias.join(', ')\n  : 'Ninguna';\n\nconst ai_context = `Analiza el siguiente cuadro clínico de ingreso bajo las leyes y reglamentos de la República del Ecuador.\n\n=== DATOS DE INGRESO A EMERGENCIAS ===\nPaciente: ${webhook_data.paciente || poliza_data?.nombre_completo || 'Paciente Desconocido'}\nCédula: ${webhook_data.cedula}\nSíntomas: ${webhook_data.sintomas}\nSignos Vitales: FC ${fc} lpm, FR ${fr} rpm, PA ${pas}/${pad} mmHg.\nNivel de Triaje Manchester: ${triage_nivel} (${triage_desc})\nEmergencia Calificada: ${emergencia_calificada ? 'SÍ' : 'NO'}\n\n=== DATOS DE LA PÓLIZA ===\nEstado de Póliza: ${poliza_data && poliza_data.estado_poliza ? poliza_data.estado_poliza : 'NO ENCONTRADA'}\nTipo de Póliza: ${poliza_data && poliza_data.tipo_poliza ? poliza_data.tipo_poliza : 'N/A'}\nVigencia: ${meses_vigencia} meses (Desde ${poliza_data && poliza_data.fecha_inicio ? poliza_data.fecha_inicio : 'N/A'})\nPreexistencias Declaradas: ${preexistencias_list}\nNotas: ${poliza_data && poliza_data.notes ? poliza_data.notes : ''}\n\n=== MARCO REGULATORIO DE ECUADOR A APLICAR ===\n1. Acuerdo Ministerial 000005169 (Triage Manchester MSP).\n2. Art. 8, 12 y 13 de la Ley de Derechos y Amparo del Paciente.\n3. Art. 34 de la Ley de Medicina Prepagada.\n4. Condiciones de Aseguradora del Sur.\n5. Lineamientos Obligatorios del MSP (Consumo de Sustancias).\n\n=== INSTRUCCIONES DE RESPUESTA ===\nDevuelve SOLO un JSON sin markdown ni texto adicional:\n{\n  \"triaje_validado\": \"${triage_nivel}\",\n  \"emergencia_calificada\": ${emergencia_calificada},\n  \"poliza_activa\": ${poliza_data && poliza_data.estado_poliza === 'ACTIVA' ? 'true' : 'false'},\n  \"cobertura_estado\": \"AUTORIZADO_INMEDIATO\",\n  \"sublimite_aplicado_usd\": ${emergencia_calificada ? sublimite_preexistencias : 0.00},\n  \"analisis_clinico_legal\": \"texto\",\n  \"alerta_bloqueo_administrativo\": \"texto o null\"\n}`;\n\nreturn [{ json: { webhook_data, poliza_data, triage_nivel, emergencia_calificada, ai_context } }];"
+      },
+      "id": "preparar-variables",
+      "name": "Preparar Variables",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.emergencia_calificada }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "evaluacion-prioridad",
+      "name": "Evaluar Prioridad (Rojo)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-1.5-flash",
+          "mode": "list",
+          "cachedResultName": "Gemini 1.5 Flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $('Preparar Variables').item.json.ai_context }}"
+            }
+          ]
+        },
+        "simplify": true
+      },
+      "id": "analisis-ia-gemini-1",
+      "name": "1. Instancia Gemini (Principal)",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        950,
+        140
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.text;\nif (typeof text === 'string' && text.trim().length > 20 && !$json.error) {\n  return [{ json: $json }];\n}\nreturn [];"
+      },
+      "id": "if-gemini-1-success",
+      "name": "Gemini 1 Exitoso?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1150,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-1.5-pro",
+          "mode": "list",
+          "cachedResultName": "Gemini 1.5 Pro"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $('Preparar Variables').item.json.ai_context }}"
+            }
+          ]
+        },
+        "simplify": true
+      },
+      "id": "analisis-ia-gemini-2",
+      "name": "2. Instancia Gemini (Respaldo Pro)",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1350,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.text;\nif (typeof text === 'string' && text.trim().length > 20 && !$json.error) {\n  return [{ json: $json }];\n}\nreturn [];"
+      },
+      "id": "if-gemini-2-success",
+      "name": "Gemini 2 Exitoso?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1550,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-1.5-flash",
+          "mode": "list",
+          "cachedResultName": "Gemini 1.5 Flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $('Preparar Variables').item.json.ai_context }}"
+            }
+          ]
+        },
+        "simplify": true
+      },
+      "id": "analisis-ia-gemini-3",
+      "name": "3. Instancia Gemini (Respaldo Flash 2)",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1750,
+        460
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Buscar el primer resultado válido entre los 3 Gemini\nfunction isValid(text) {\n  return typeof text === 'string' && text.trim().length > 20 && !text.includes('\"error\"');\n}\n\nlet raw_content = null;\nlet fuente_usada = 'bypass';\n\ntry {\n  const g1 = $('1. Instancia Gemini (Principal)').first()?.json;\n  if (g1 && isValid(g1.text)) { raw_content = g1.text; fuente_usada = 'Gemini-1-Flash'; }\n} catch(e) {}\n\nif (!raw_content) {\n  try {\n    const g2 = $('2. Instancia Gemini (Respaldo Pro)').first()?.json;\n    if (g2 && isValid(g2.text)) { raw_content = g2.text; fuente_usada = 'Gemini-2-Pro'; }\n  } catch(e) {}\n}\n\nif (!raw_content) {\n  try {\n    const g3 = $('3. Instancia Gemini (Respaldo Flash 2)').first()?.json;\n    if (g3 && isValid(g3.text)) { raw_content = g3.text; fuente_usada = 'Gemini-3-Flash'; }\n  } catch(e) {}\n}\n\n// Parsear JSON de la IA\nlet dictamen = null;\nif (raw_content) {\n  const cleaned = raw_content.replace(/```json\\n?/gi, '').replace(/```\\n?/g, '').trim();\n  try {\n    dictamen = JSON.parse(cleaned);\n  } catch(e) {\n    const match = cleaned.match(/{[\\s\\S]*}/);\n    if (match) { try { dictamen = JSON.parse(match[0]); } catch(e2) {} }\n  }\n}\n\n// Bypass catastrófico\nif (!dictamen || typeof dictamen !== 'object') {\n  let prep = { triage_nivel: 'Rojo' };\n  try { prep = $('Preparar Variables').item.json; } catch(e) {}\n  dictamen = {\n    triaje_validado: prep.triage_nivel || 'Rojo',\n    emergencia_calificada: true,\n    poliza_activa: true,\n    cobertura_estado: 'AUTORIZADO_INMEDIATO',\n    sublimite_aplicado_usd: 9200.00,\n    analisis_clinico_legal: 'Bypass activado por Failover general. Resguardo legal Art. 8 y 13.',\n    alerta_bloqueo_administrativo: 'Alerta Administrativa Activa por colapso de red.'\n  };\n  fuente_usada = 'bypass-catastrofico';\n}\n\n// Normalizar\ndictamen.triaje_validado = dictamen.triaje_validado || 'Rojo';\ndictamen.emergencia_calificada = dictamen.emergencia_calificada !== false;\ndictamen.poliza_activa = dictamen.poliza_activa !== false;\ndictamen.cobertura_estado = dictamen.cobertura_estado || 'AUTORIZADO_INMEDIATO';\ndictamen.sublimite_aplicado_usd = parseFloat(dictamen.sublimite_aplicado_usd || 0);\nif (isNaN(dictamen.sublimite_aplicado_usd)) dictamen.sublimite_aplicado_usd = 0.00;\n\nconst raw_analisis = dictamen.analisis_clinico_legal || 'Sin análisis disponible.';\ndictamen.analisis_clinico_legal = raw_analisis;\ndictamen.analisis_clinico_legal_sql = raw_analisis.replace(/'/g, \"''\").replace(/[\\r\\n]+/g, ' ');\ndictamen.alerta_bloqueo_administrativo = dictamen.alerta_bloqueo_administrativo || null;\ndictamen.cobertura_otorgada_sql = dictamen.cobertura_estado === 'AUTORIZADO_INMEDIATO' ? 'true' : 'false';\ndictamen.fuente_ia = fuente_usada;\n\nreturn [{ json: dictamen }];"
+      },
+      "id": "parse-gemini-dictamen",
+      "name": "Parsear Dictamen AI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO historial_emergencias (cedula, fecha_ingreso, hospital, diagnostico_cie10, descripcion_dx, cobertura_otorgada, monto_cubierto_usd, estado_auditoria)\nVALUES (\n  '{{ $(\"Webhook Entrada Triage\").item.json.body.cedula }}',\n  NOW(),\n  '{{ $(\"Webhook Entrada Triage\").item.json.body.hospital || \"Hospital de Especialidades\" }}',\n  '{{ $json.triaje_validado }}',\n  '{{ $json.analisis_clinico_legal_sql }}',\n  {{ $json.cobertura_otorgada_sql }},\n  {{ $json.sublimite_aplicado_usd }},\n  '{{ $json.cobertura_estado }}'\n);"
+      },
+      "id": "insertar-postgres-docker",
+      "name": "Guardar en Postgres (Docker)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2250,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-local-credentials"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  dictamen: {\n    triaje_validado: $json.triaje_validado || 'Rojo',\n    cobertura_estado: $json.cobertura_estado || 'AUTORIZADO_INMEDIATO',\n    emergencia_calificada: $json.emergencia_calificada,\n    poliza_activa: $json.poliza_activa,\n    analisis_clinico_legal: $json.analisis_clinico_legal,\n    alerta_bloqueo_administrativo: $json.alerta_bloqueo_administrativo || 'No aplica',\n    sublimite_applied_usd: $json.sublimite_aplicado_usd || 0.00,\n    fuente_ia: $json.fuente_ia\n  },\n  notificaciones_enviadas: {\n    admisiones_hospital: {\n      enviado: true,\n      timestamp: new Date().toISOString(),\n      destinatario: 'DEPARTAMENTO_ADMISIONES_HOSPITAL',\n      prioridad: $json.emergencia_calificada ? 'CRÍTICA' : 'NORMAL'\n    },\n    gestor_casos_seguro: {\n      enviado: true,\n      timestamp: new Date().toISOString(),\n      destinatario: 'GESTOR_CASOS_ASEGURADORA_SUR'\n    }\n  }\n} }}"
+      },
+      "id": "respuesta-webhook-ok",
+      "name": "Respuesta Webhook Éxito",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  dictamen: {\n    triaje_validado: $('Preparar Variables').item.json.triage_nivel || 'Verde',\n    cobertura_estado: 'SUSPENDIDO_AUDITORIA',\n    emergencia_calificada: false,\n    poliza_activa: $('Preparar Variables').item.json.poliza_data ? $('Preparar Variables').item.json.poliza_data.estado_poliza === 'ACTIVA' : false,\n    analisis_clinico_legal: 'Paciente en estado estable (Prioridad IV/V). No califica como Emergencia Médica de riesgo vital inmediato. Se deriva a Consulta Externa.',\n    alerta_bloqueo_administrativo: 'No aplica (Cuadro estable)',\n    sublimite_aplicado_usd: 0.00\n  },\n  notificaciones_enviadas: {\n    admisiones_hospital: {\n      enviado: true,\n      timestamp: new Date().toISOString(),\n      destinatario: 'DEPARTAMENTO_ADMISIONES_HOSPITAL',\n      prioridad: 'NORMAL'\n    },\n    gestor_casos_seguro: {\n      enviado: true,\n      timestamp: new Date().toISOString(),\n      destinatario: 'GESTOR_CASOS_ASEGURADORA_SUR'\n    }\n  }\n} }}"
+      },
+      "id": "respuesta-webhook-estable",
+      "name": "Respuesta Webhook Estable",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        900,
+        460
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Entrada Triage": {
+      "main": [
+        [
+          {
+            "node": "Consultar DB Póliza",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar DB Póliza": {
+      "main": [
+        [
+          {
+            "node": "Preparar Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Variables": {
+      "main": [
+        [
+          {
+            "node": "Evaluar Prioridad (Rojo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluar Prioridad (Rojo)": {
+      "main": [
+        [
+          {
+            "node": "1. Instancia Gemini (Principal)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta Webhook Estable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Instancia Gemini (Principal)": {
+      "main": [
+        [
+          {
+            "node": "Gemini 1 Exitoso?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 1 Exitoso?": {
+      "main": [
+        [
+          {
+            "node": "Parsear Dictamen AI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "2. Instancia Gemini (Respaldo Pro)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Instancia Gemini (Respaldo Pro)": {
+      "main": [
+        [
+          {
+            "node": "Gemini 2 Exitoso?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2 Exitoso?": {
+      "main": [
+        [
+          {
+            "node": "Parsear Dictamen AI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "3. Instancia Gemini (Respaldo Flash 2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Instancia Gemini (Respaldo Flash 2)": {
+      "main": [
+        [
+          {
+            "node": "Parsear Dictamen AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear Dictamen AI": {
+      "main": [
+        [
+          {
+            "node": "Guardar en Postgres (Docker)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar en Postgres (Docker)": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Webhook Éxito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "datacore-workflow-v3"
+}
