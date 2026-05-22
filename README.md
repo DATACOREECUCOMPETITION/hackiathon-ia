@@ -24,7 +24,6 @@ Gemini 2.5 Flash (Respaldo de Alta Capacidad)
 
 Gemini 2.5 Flash (Segunda Contingencia)
 
-⚠️ Mecanismo de Mitigación: Si las APIs externas presentan latencias críticas o caídas de red, el flujo ejecuta de forma instantánea un bypass catastrófico local mediante JavaScript dentro de n8n, asegurando que el triaje de emergencia nunca se detenga.
 
 🛡️ Conectividad y Red Segura (Cloudflare Tunnels)
 La plataforma implementa una interconexión segura que expone los servicios a internet sin necesidad de abrir puertos en el firewall ni exponer IPs públicas directas. Esto se logra mediante Cloudflare Tunnels utilizando tres contenedores independientes de cloudflared para aislar el tráfico:
