@@ -37,15 +37,25 @@ cloudflared-webhooks: Canal exclusivo para las llamadas críticas a la API de tr
 
 ## 🚀 Instrucciones de Despliegue Local
 
-Para levantar el entorno de desarrollo local, sigue estos pasos:
+Sigue estos pasos para clonar, configurar y levantar el entorno de desarrollo local en tu máquina.
 
-### Prerrequisitos
-* Node.js (versión 18 o superior)
-* Wrangler CLI (`npm install -g wrangler`) para la gestión de Cloudflare Workers.
+### 📋 Prerrequisitos
 
-### Pasos
-1. **Clonar el repositorio:**
-   
+Antes de comenzar, asegúrate de tener instalado lo siguiente en tu sistema:
+
+* **Node.js** (Versión 18.0 o superior)
+* **Docker & Docker Compose** (Para el despliegue de la base de datos y contenedores de red)
+* **Wrangler CLI** (Herramientas de línea de comandos global para Cloudflare Workers)
+    ```bash
+    npm install -g wrangler
+    ```
+
+---
+
+### 🛠️ Pasos para la Instalación
+
+#### 1. Clonar el Repositorio
+Primeramente, clona el proyecto desde el repositorio oficial y accede al directorio raíz:
 ```bash
-   git clone [https://github.com/DATACOREECUCOMPETITION/hackiathon-ia.git]
-   cd hackiathon-ia
+git clone [https://github.com/DATACOREECUCOMPETITION/hackiathon-ia.git](https://github.com/DATACOREECUCOMPETITION/hackiathon-ia.git)
+cd hackiathon-ia
