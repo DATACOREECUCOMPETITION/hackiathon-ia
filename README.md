@@ -2,20 +2,7 @@
 
 El sistema está diseñado bajo una arquitectura ligera, modular y de alta disponibilidad con tolerancia a fallos, optimizada específicamente para las demandas críticas de un entorno hospitalario y el despliegue ágil de un Hackathon de IA.
 ---
-[ Frontend SPA ] ──( HTTPS )──> [ Nginx Reverse Proxy ]
-                                         │
-                                         ├──> [ Servidor Estático (UI) ]
-                                         └──> [ Webhooks n8n (Orquestador) ]
-                                                     │
-                        ┌────────────────────────────┴────────────────────────────┐
-                        ▼                                                         ▼
-         [ PostgreSQL 17 (Docker) ]                                  [ Infraestructura IA (Failover) ]
-       (n8n_data_hackaton / CIE-10)                                 ├── 1. Gemini 2.5 Flash (Principal)
-                                                                    ├── 2. Gemini 2.5 Flash (Respaldo)
-                                                                    ├── 3. Gemini 2.5 Flash (Contingencia)
-
-
- 
+<img width="813" height="267" alt="image" src="https://github.com/user-attachments/assets/445b89b5-994e-4885-a7e2-9cfe592d6641" />
 ---
 🧱 Componentes Core
 🧠 Core del Agente & Backend (Orquestación con n8n y Nginx)
