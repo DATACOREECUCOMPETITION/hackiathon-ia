@@ -1,28 +1,52 @@
-🏥 SATE-I: Sistema de Auditoría de Triaje Automático y Emergencias
-🏗️ Arquitectura del Sistema e Infraestructura
-El sistema se diseñó bajo una arquitectura híbrida, modular y altamente resiliente, optimizada para entornos de misión crítica donde la disponibilidad y el aislamiento de datos son fundamentales. En lugar de depender de entornos monolíticos o pesados, se optó por un enfoque desacoplado que combina la flexibilidad de contenedores livianos con el rendimiento de servicios nativos.
+## 🏗️ Arquitectura del Sistema
 
-🧠 Core del Backend y Orquestación de Procesos
-Motor de Flujos: Despliegue nativo de N8N corriendo bajo un servicio de sistema (systemd) en el host principal. Este motor actúa como el cerebro del sistema, ejecutando la lógica de negocio, el procesamiento de las reglas del Triaje Manchester (regulado por el MSP) y la intercomunicación de capas.
+El sistema está diseñado bajo una arquitectura ligera, modular y de alta disponibilidad con tolerancia a fallos, optimizada específicamente para las demandas críticas de un entorno hospitalario y el despliegue ágil de un Hackathon de IA.
+---
+[ Frontend SPA ] ──( HTTPS )──> [ Nginx Reverse Proxy ]
+                                         │
+                                         ├──> [ Servidor Estático (UI) ]
+                                         └──> [ Webhooks n8n (Orquestador) ]
+                                                     │
+                        ┌────────────────────────────┴────────────────────────────┐
+                        ▼                                                         ▼
+         [ PostgreSQL 17 (Docker) ]                                  [ Infraestructura IA (Failover) ]
+       (n8n_data_hackaton / CIE-10)                                 ├── 1. Gemini 2.5 Flash (Principal)
+                                                                    ├── 2. Gemini 2.5 Flash (Respaldo)
+                                                                    ├── 3. Gemini 2.5 Flash (Contingencia)
 
-Tolerancia a Fallos (Triple-LLM Failover Circuit): Para mitigar caídas de servicio o errores de cuota (503 Service Unavailable / 429 Rate Limit), se implementó un pipeline en cascada con 3 instancias consecutivas de la API de Google Gemini (Gemini 1.5 Flash y Pro) con control de errores activo (onError: continue). Si la instancia principal falla o experimenta latencia elevada, el flujo conmuta en tiempo real a las instancias de respaldo. En caso de un colapso general de red, el sistema activa un Bypass Catastrófico Local que fuerza un dictamen estructurado para garantizar que la SPA nunca se rompa de cara al usuario.
 
-🗄️ Capa de Datos y Almacenamiento
-Motor de Base de Datos: PostgreSQL 17 dockerizado sobre una imagen ultra-liviana basada en Alpine Linux.
+ 
+---
+🧱 Componentes Core
+🧠 Core del Agente & Backend (Orquestación con n8n y Nginx)
+La lógica de negocio, la validación clínica y la ingesta de alertas de emergencia se orquestan mediante flujos de trabajo visuales en n8n (Self-hosted). Las peticiones entrantes desde la interfaz de usuario (Single Page Application) son administradas por un proxy inverso Nginx, encargado de redirigir los webhooks hacia el motor de automatización y de servir la UI web estática de forma eficiente.
 
-Aislamiento y Persistencia: El contenedor expone el puerto 5432 hacia el host de forma segura, permitiendo que el servicio nativo de N8N persista los historiales de emergencia, estructuras de pólizas y análisis clínico-legales sin contaminar el entorno global del servidor.
+🗄️ Base de Datos (SQL sobre Docker)
+Se emplea PostgreSQL 17 con persistencia de volumen en un contenedor Docker, utilizando la base de datos n8n_data_hackaton. Este motor almacena:
 
-🌐 Capa de Presentación (Frontend SPA Premium)
-Interfaz de Usuario: Una Single Page Application (SPA) moderna, responsiva y diseñada bajo una interfaz limpia de modo claro (light theme).
+polizas: Historial de carencias y preexistencias clínicas codificadas bajo el estándar internacional CIE-10.
 
-Servidor Web y Proxy Inverso: Nginx dockerizado en Alpine Linux expone el puerto 80 del host, sirviendo el frontend estático y gestionando las reglas de ruteo inverso para redirigir de forma segura las peticiones hacia los endpoints correspondientes (/webhook/ e ingresos de emergencia).
+historial_emergencias: Registro en tiempo real de los estados de triaje y auditorías clínico-legales, alineados estrictamente con la normativa de salud vigente en Ecuador.
 
-Mecanismo de Contingencia del Cliente: El frontend incluye un script de interceptación inteligente; si el backend devuelve un error interno (HTTP 500) o hay problemas de conectividad en el túnel, la SPA conmuta inmediatamente a una simulación clínica y legal exacta para mantener la demo operativa bajo cualquier circunstancia.
+🤖 Infraestructura de IA Resiliente (Triple Failover con Gemini)
+Para garantizar una disponibilidad del 99.9% en situaciones críticas de salud, se integró un sistema de contingencia en cascada que conmuta dinámicamente entre tres instancias de LLMs:
 
-🛡️ Red y Seguridad (Seguridad Perimetral)
-Conectividad Segura: Despliegue de Cloudflare Tunnels (cloudflared) dockerizados independientes. Esta arquitectura elimina la necesidad de abrir puertos públicos en el router o configurar reglas de firewall complejas en el host.
+Gemini 2.5 Flash (Instancia Principal)
 
-Topología de Subdominios: El tráfico se segmenta de manera modular mediante tres túneles independientes amarrados a tokens específicos, exponiendo los servicios hacia la web con cifrado HTTPS automático:
+Gemini 2.5 Flash (Respaldo de Alta Capacidad)
+
+Gemini 2.5 Flash (Segunda Contingencia)
+
+⚠️ Mecanismo de Mitigación: Si las APIs externas presentan latencias críticas o caídas de red, el flujo ejecuta de forma instantánea un bypass catastrófico local mediante JavaScript dentro de n8n, asegurando que el triaje de emergencia nunca se detenga.
+
+🛡️ Conectividad y Red Segura (Cloudflare Tunnels)
+La plataforma implementa una interconexión segura que expone los servicios a internet sin necesidad de abrir puertos en el firewall ni exponer IPs públicas directas. Esto se logra mediante Cloudflare Tunnels utilizando tres contenedores independientes de cloudflared para aislar el tráfico:
+
+cloudflared-index: Acceso al Frontend principal.
+
+cloudflared-panel: Acceso al panel de administración.
+
+cloudflared-webhooks: Canal exclusivo para las llamadas críticas a la API de triaje.
 ---
 <img width="1731" height="628" alt="image" src="https://github.com/user-attachments/assets/4d1e79b7-8077-4ac3-8570-98836af9d37e" />
 
