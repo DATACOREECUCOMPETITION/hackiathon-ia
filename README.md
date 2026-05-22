@@ -24,6 +24,8 @@ El sistema se diseñó bajo una arquitectura ligera, modular y de alta disponibi
 *   **Túneles y Red:** Despliegue seguro utilizando Cloudflare Tunnels para la interconexión de entornos aislados.
 
 ---
+<img width="1731" height="628" alt="image" src="https://github.com/user-attachments/assets/4d1e79b7-8077-4ac3-8570-98836af9d37e" />
+
 
 ## 🚀 Instrucciones de Despliegue Local
 
