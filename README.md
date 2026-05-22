@@ -16,13 +16,12 @@ El agente se encuentra desplegado y completamente operativo en la siguiente URL 
 
 ## 🛠️ Stack Tecnológico y Arquitectura
 
-El sistema se diseñó bajo una arquitectura ligera, modular y de alta disponibilidad:
+El sistema se diseñó bajo una arquitectura ligera, modular, de alta disponibilidad y con tolerancia a fallos:
 
 *   **Core del Agente / Backend:** Hono.js ejecutado sobre la infraestructura Edge de Cloudflare (Cloudflare Workers).
 *   **Base de Datos:** Cloudflare D1 (SQL nativo en el Edge) para el almacenamiento de registros y estados del triaje.
-*   **Modelos de IA:** Integración de LLMs optimizados para inferencia de baja latencia mediante el consumo de APIs externas especializadas.
+*   **Infraestructura de IA Resiliente (Multi-LLM Failover):** Integración de un sistema de conmutación por error automatizado que conmuta dinámicamente entre 3 proveedores de IA independientes. Si una API experimenta latencia elevada o caídas del servicio, el agente redirige la solicitud en tiempo real para garantizar una disponibilidad del 99.9% en entornos críticos de emergencia.
 *   **Túneles y Red:** Despliegue seguro utilizando Cloudflare Tunnels para la interconexión de entornos aislados.
-
 ---
 <img width="1731" height="628" alt="image" src="https://github.com/user-attachments/assets/4d1e79b7-8077-4ac3-8570-98836af9d37e" />
 
