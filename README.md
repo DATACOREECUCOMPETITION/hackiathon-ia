@@ -37,5 +37,5 @@ Para levantar el entorno de desarrollo local, sigue estos pasos:
 1. **Clonar el repositorio:**
    
 ```bash
-   git clone [https://github.com/DATACOREECUCOMPETITION/hackiathon-ia.git](https://github.com/DATACOREECUCOMPETITION/hackiathon-ia.git)
+   git clone [https://github.com/DATACOREECUCOMPETITION/hackiathon-ia.git]
    cd hackiathon-ia
