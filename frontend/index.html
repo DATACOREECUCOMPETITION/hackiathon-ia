@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Alerta Temprana - Admisiones de Emergencia</title>
+    
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome para Iconos Premium -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ── Variables de Diseño Light Premium ────────────────────── */
+        :root {
+            --bg-page: #f4f7fa;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 10px 25px rgba(148, 163, 184, 0.12);
+            --shadow-lg: 0 20px 40px rgba(148, 163, 184, 0.18);
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Estilos Base ────────────────────────────────────────── */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.5;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ── Header / Navbar ─────────────────────────────────────── */
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        .logo-text h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(135deg, var(--primary) 0%, #312e81 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .system-badge {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* ── Layout Principal ────────────────────────────────────── */
+        main {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        /* ── Casos de Prueba (Tarjetas Rápidas) ───────────────────── */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .quick-cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .case-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .case-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--primary);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .case-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: #cbd5e1;
+        }
+
+        .case-card.active {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            background-color: #fafafa;
+        }
+
+        .case-card.active::before {
+            opacity: 1;
+        }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .case-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .case-badge.autorizado { background-color: var(--success-light); color: var(--success); }
+        .case-badge.auditoria { background-color: var(--warning-light); color: var(--warning); }
+        .case-badge.rechazado { background-color: var(--danger-light); color: var(--danger); }
+
+        .case-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .case-cedula {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .case-info {
+            font-size: 0.8rem;
+            color: var(--text-main);
+            background-color: #f8fafc;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--border-color);
+            margin-top: auto;
+        }
+
+        /* ── Grid Central (Formulario y Resultados) ───────────────── */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 992px) {
+            .workspace-grid {
+                grid-template-columns: 450px 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-title i {
+            color: var(--primary);
+        }
+
+        /* ── Formulario de Ingreso ───────────────────────────────── */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group.row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            background-color: #f8fafc;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        textarea {
+            resize: none;
+            height: 100px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
+            color: white;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* ── Panel de Resultados (Dashboard Dispatch) ──────────────── */
+        .placeholder-result {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            margin: auto 0;
+            background-color: #f8fafc;
+        }
+
+        .placeholder-result i {
+            font-size: 3rem;
+            color: var(--border-color);
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        /* ── Estructura del Resultado Activo ──────────────────────── */
+        .result-container {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cabecera del Dictamen */
+        .dictamen-header-card {
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .dictamen-info-patient h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .dictamen-info-patient p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Estado del Dictamen */
+        .state-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .badge-main {
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-main.autorizado { background-color: var(--success-light); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-main.auditoria { background-color: var(--warning-light); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge-main.rechazado { background-color: var(--danger-light); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        /* Dos Columnas de Análisis */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .analysis-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .analysis-box {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            height: 100%;
+        }
+
+        .analysis-box.clinical { border-left: 4px solid var(--primary); }
+        .analysis-box.legal { border-left: 4px solid var(--warning); }
+
+        .analysis-box h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .analysis-box.clinical h4 { color: var(--primary); }
+        .analysis-box.legal h4 { color: var(--warning); }
+
+        .analysis-box p {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Sección de Leyes y Sublímites */
+        .sublimites-banner {
+            background-color: var(--primary-light);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sublimites-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .sublimites-content h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #312e81;
+            margin-bottom: 0.15rem;
+        }
+
+        .sublimites-content p {
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+
+        /* Notificaciones en Tiempo Real */
+        .notifications-panel {
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+        }
+
+        .notifications-panel h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.75rem;
+        }
+
+        .notification-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .notif-details {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notif-icon-wrapper {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .notification-item.admissions .notif-icon-wrapper { background-color: #dbeafe; color: #2563eb; }
+        .notification-item.manager .notif-icon-wrapper { background-color: #fae8ff; color: #d946ef; }
+
+        .notif-info h5 {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .notif-info p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .notif-status {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .notif-status.delivered { background-color: var(--success-light); color: var(--success); }
+
+        /* Loader */
+        .loader-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 10;
+            border-radius: var(--radius-lg);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header>
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-house-medical-shield"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>ASEGURADORA DEL SUR</h1>
+                    <p>Core de Emergencias e Ingresos Médicos</p>
+                </div>
+            </div>
+            
+            <div class="system-badge">
+                <i class="fa-solid fa-bolt"></i>
+                <span>Gemini AI Engine Activo</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main>
+        
+        <!-- Casos Rápidos de Prueba -->
+        <div class="section-title">
+            <i class="fa-solid fa-vials"></i>
+            <span>Simulación Rápida (Casos Clínicos de Prueba)</span>
+        </div>
+        
+        <div class="quick-cases-grid">
+            
+            <!-- Caso 1 -->
+            <div class="case-card" onclick="loadCase(1)" id="case-1">
+                <div class="case-header">
+                    <span class="case-badge autorizado">Autorizado</span>
+                    <i class="fa-solid fa-circle-check" style="color: var(--success);"></i>
+                </div>
+                <div>
+                    <h3 class="case-name">Carlos Andrade Villacís</h3>
+                    <p class="case-cedula"><i class="fa-regular fa-id-card"></i> 1724567890</p>
+                </div>
+                <p class="case-info">
+                    <strong>Diabetes E10:</strong> 26 meses vigencia. Cetoacidosis aguda. Aplica Art. 34 (Sublímite $9,200).
+                </p>
+            </div>
+            
+            <!-- Caso 2 -->
+            <div class="case-card" onclick="loadCase(2)" id="case-2">
+                <div class="case-header">
+                    <span class="case-badge auditoria">Carencia</span>
+                    <i class="fa-solid fa-clock" style="color: var(--warning);"></i>
+                </div>
+                <div>
+                    <h3 class="case-name">María Elena Flores</h3>
+                    <p class="case-cedula"><i class="fa-regular fa-id-card"></i> 1751234567</p>
+                </div>
+                <p class="case-info">
+                    <strong>Apendicitis K37:</strong> 3 meses de vigencia. Rechazo por carencia (< 24 meses).
+                </p>
+            </div>
+            
+            <!-- Caso 3 -->
+            <div class="case-card" onclick="loadCase(3)" id="case-3">
+                <div class="case-header">
+                    <span class="case-badge rechazado">Exclusión</span>
+                    <i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i>
+                </div>
+                <div>
+                    <h3 class="case-name">Juan Carlos Zuñiga</h3>
+                    <p class="case-cedula"><i class="fa-regular fa-id-card"></i> 0918765432</p>
+                </div>
+                <p class="case-info">
+                    <strong>Fractura por Choque:</strong> Póliza Accidentes. Anamnesis revela Síncope R55 previo excluido.
+                </p>
+            </div>
+            
+            <!-- Caso 4 -->
+            <div class="case-card" onclick="loadCase(4)" id="case-4">
+                <div class="case-header">
+                    <span class="case-badge rechazado">Inactivo</span>
+                    <i class="fa-solid fa-circle-xmark" style="color: var(--danger);"></i>
+                </div>
+                <div>
+                    <h3 class="case-name">Ana Belén Ruiz</h3>
+                    <p class="case-cedula"><i class="fa-regular fa-id-card"></i> 1711223344</p>
+                </div>
+                <p class="case-info">
+                    <strong>Póliza Corporativa:</strong> Inactiva hace 2 meses. No se permite cobertura de emergencia.
+                </p>
+            </div>
+            
+        </div>
+
+        <!-- Grid Principal de Entrada/Salida -->
+        <div class="workspace-grid">
+            
+            <!-- Formulario de Entrada -->
+            <div class="panel" style="position: relative;">
+                <!-- Loader -->
+                <div class="loader-overlay" id="loader">
+                    <div class="spinner"></div>
+                    <p style="font-weight: 600; color: var(--primary);">Analizando Caso Clínico-Legal...</p>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Consultando DB e invocando Google Gemini AI</p>
+                </div>
+                
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fa-solid fa-file-medical"></i>
+                        <span>Ingreso de Emergencia</span>
+                    </h2>
+                </div>
+                
+                <form id="emergency-form" onsubmit="submitForm(event)">
+                    <div class="form-group">
+                        <label for="cedula">Cédula del Asegurado</label>
+                        <input type="text" id="cedula" name="cedula" placeholder="Ej. 1724567890" required maxlength="10" minlength="10">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nombre">Nombre Completo</label>
+                        <input type="text" id="nombre" name="nombre" placeholder="Ej. Carlos Andrade" required>
+                    </div>
+                    
+                    <div class="form-group row-2">
+                        <div>
+                            <label for="tipo_poliza">Tipo de Póliza</label>
+                            <select id="tipo_poliza" name="tipo_poliza" required>
+                                <option value="INDIVIDUAL">Individual</option>
+                                <option value="CORPORATIVA">Corporativa</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="hospital">Hospital / Clínica</label>
+                            <select id="hospital" name="hospital" required>
+                                <option value="Hospital Metropolitano">H. Metropolitano</option>
+                                <option value="Clínica La Merced">Clínica La Merced</option>
+                                <option value="Hospital Alcívar">Hospital Alcívar</option>
+                                <option value="Hospital Vozandes">H. Vozandes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row-2">
+                        <div>
+                            <label for="fc">Frec. Cardíaca (FC) lpm</label>
+                            <input type="number" id="fc" name="fc" placeholder="Ej. 98" required>
+                        </div>
+                        <div>
+                            <label for="fr">Frec. Respiratoria (FR) rpm</label>
+                            <input type="number" id="fr" name="fr" placeholder="Ej. 18" value="18" required>
+                        </div>
+                    </div>
+                    <div class="form-group row-2">
+                        <div>
+                            <label for="pas">Presión Sistólica (PAS) mmHg</label>
+                            <input type="number" id="pas" name="pas" placeholder="Ej. 120" required>
+                        </div>
+                        <div>
+                            <label for="pad">Presión Diastólica (PAD) mmHg</label>
+                            <input type="number" id="pad" name="pad" placeholder="Ej. 80" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sintomas">Síntomas / Motivo de Ingreso</label>
+                        <textarea id="sintomas" name="sintomas" placeholder="Describa brevemente el estado clínico actual del paciente..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submit-btn">
+                        <i class="fa-solid fa-circle-play"></i>
+                        <span>Enviar Alerta Temprana</span>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Panel de Resultados (Centro de Comando) -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Dictamen Técnico AI del Caso</span>
+                    </h2>
+                </div>
+                
+                <!-- Estado Vacío (Placeholder) -->
+                <div class="placeholder-result" id="placeholder-result">
+                    <i class="fa-solid fa-receipt"></i>
+                    <h3>Esperando Datos del Paciente</h3>
+                    <p style="margin-top: 0.5rem; max-width: 350px;">Selecciona uno de los casos clínicos simulados arriba o rellena el formulario de ingreso para activar la validación y el dictamen AI en tiempo real.</p>
+                </div>
+                
+                <!-- Contenedor del Resultado -->
+                <div class="result-container" id="result-container">
+                    
+                    <!-- Fila Principal: Nombre del paciente e indicador de cobertura -->
+                    <div class="dictamen-header-card">
+                        <div class="dictamen-info-patient">
+                            <h3 id="res-nombre">Carlos Andrade Villacís</h3>
+                            <p><i class="fa-regular fa-id-card"></i> Cédula: <span id="res-cedula">1724567890</span></p>
+                        </div>
+                        <div class="state-container">
+                            <span class="badge-main autorizado" id="res-badge">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span id="res-cobertura">AUTORIZADO</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Grid de Análisis Clínico y Legal -->
+                    <div class="analysis-grid">
+                        
+                        <!-- Clínico -->
+                        <div class="analysis-box clinical">
+                            <h4><i class="fa-solid fa-stethoscope"></i> Análisis Clínico / Triage</h4>
+                            <p id="res-clinico">Análisis detallado generado por el agente clínico de inteligencia artificial sobre la urgencia y signos vitales.</p>
+                        </div>
+                        
+                        <!-- Legal -->
+                        <div class="analysis-box legal">
+                            <h4><i class="fa-solid fa-scale-balanced"></i> Análisis Legal</h4>
+                            <p id="res-legal">Análisis legal detallado, aplicando la Ley Orgánica que Regula las Compañías de Medicina Prepagada en Ecuador.</p>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Banner de Sublímites y Cobertura -->
+                    <div class="sublimites-banner" id="res-sublimite-card">
+                        <div class="sublimites-icon">
+                            <i class="fa-solid fa-hand-holding-dollar"></i>
+                        </div>
+                        <div class="sublimites-content">
+                            <h4 id="res-sublimite-titulo">Sublímite Legal Obligatorio Aplicado</h4>
+                            <p id="res-sublimite-desc">Aplica sublímite obligatorio de $9,200.00 USD por preexistencia declarada y antigüedad.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Panel de Despacho y Notificaciones Paralelas -->
+                    <div class="notifications-panel">
+                        <h4><i class="fa-solid fa-paper-plane"></i> Despacho Simultáneo de Notificaciones</h4>
+                        
+                        <!-- Notificación 1 -->
+                        <div class="notification-item admissions">
+                            <div class="notif-details">
+                                <div class="notif-icon-wrapper">
+                                    <i class="fa-solid fa-hospital"></i>
+                                </div>
+                                <div class="notif-info">
+                                    <h5>Admisiones del Hospital / Clínica</h5>
+                                    <p id="res-notif-hospital">Enviando dictamen de ingreso inmediato y pre-aprobación...</p>
+                                </div>
+                            </div>
+                            <span class="notif-status delivered">
+                                <i class="fa-solid fa-circle-check"></i> Entregado
+                            </span>
+                        </div>
+                        
+                        <!-- Notificación 2 -->
+                        <div class="notification-item manager">
+                            <div class="notif-details">
+                                <div class="notif-icon-wrapper">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div class="notif-info">
+                                    <h5>Gestor de Casos de la Aseguradora</h5>
+                                    <p>Asignando caso médico para seguimiento inmediato...</p>
+                                </div>
+                            </div>
+                            <span class="notif-status delivered">
+                                <i class="fa-solid fa-circle-check"></i> Entregado
+                            </span>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Aseguradora del Sur C.A. Todos los derechos reservados. Centro de Alerta Temprana AI con motor Google Gemini.</p>
+    </footer>
+
+    <!-- Script de Simulación Interactiva -->
+    <script>
+        // ── Datos de los 4 Casos Clínicos ─────────────────────────
+        const casos = {
+            1: {
+                cedula: '1724567890',
+                nombre: 'Carlos Andrade Villacís',
+                tipo_poliza: 'INDIVIDUAL',
+                hospital: 'Hospital Metropolitano',
+                fc: 105,
+                fr: 22,
+                pas: 110,
+                pad: 70,
+                sintomas: 'Paciente ingresa por emergencia deshidratado, reporta náuseas intensas, aliento cetónico y dolor abdominal generalizado. Asegura padecer diabetes mellitus diagnosticada y declarada en la póliza hace más de dos años.'
+            },
+            2: {
+                cedula: '1751234567',
+                nombre: 'María Elena Flores Santamaría',
+                tipo_poliza: 'INDIVIDUAL',
+                hospital: 'Clínica La Merced',
+                fc: 94,
+                fr: 20,
+                pas: 120,
+                pad: 80,
+                sintomas: 'Paciente ingresa con dolor punzante en la fosa ilíaca derecha, náuseas y fiebre leve de 38°C. Sospecha clínica fuerte de Apendicitis Aguda. La póliza tiene una vigencia de únicamente 3 meses.'
+            },
+            3: {
+                cedula: '0918765432',
+                nombre: 'Juan Carlos Zuñiga Mendieta',
+                tipo_poliza: 'INDIVIDUAL',
+                hospital: 'Hospital Alcívar',
+                fc: 88,
+                fr: 18,
+                pas: 130,
+                pad: 85,
+                sintomas: 'Paciente ingresa por emergencia reportando fractura expuesta en pierna izquierda tras haber chocado su vehículo. Durante el reporte inicial de enfermería, se anota que el paciente sufrió un mareo o síncope repentino mientras conducía, perdiendo el control. Cuenta con antecedente clínico de síncope recurrente declarado.'
+            },
+            4: {
+                cedula: '1711223344',
+                nombre: 'Ana Belén Ruiz Coronel',
+                tipo_poliza: 'CORPORATIVA',
+                hospital: 'Hospital Vozandes',
+                fc: 75,
+                fr: 16,
+                pas: 115,
+                pad: 75,
+                sintomas: 'Paciente ingresa con sospecha de luxación en muñeca derecha tras resbalar en su domicilio. Reporta dolor moderado.'
+            }
+        };
+
+        // Cargar un Caso Clínico en el Formulario
+        function loadCase(id) {
+            // Desmarcar tarjetas previas
+            document.querySelectorAll('.case-card').forEach(c => c.classList.remove('active'));
+            
+            // Marcar tarjeta activa
+            document.getElementById(`case-${id}`).classList.add('active');
+            
+            // Llenar formulario
+            const caso = casos[id];
+            document.getElementById('cedula').value = caso.cedula;
+            document.getElementById('nombre').value = caso.nombre;
+            document.getElementById('tipo_poliza').value = caso.tipo_poliza;
+            document.getElementById('hospital').value = caso.hospital;
+            document.getElementById('fc').value = caso.fc;
+            document.getElementById('fr').value = caso.fr || 18;
+            document.getElementById('pas').value = caso.pas;
+            document.getElementById('pad').value = caso.pad;
+            document.getElementById('sintomas').value = caso.sintomas;
+        }
+
+        // Enviar Formulario al Webhook N8N
+        async function submitForm(event) {
+            event.preventDefault();
+            
+            const loader = document.getElementById('loader');
+            const submitBtn = document.getElementById('submit-btn');
+            const placeholder = document.getElementById('placeholder-result');
+            const resultContainer = document.getElementById('result-container');
+            
+            // Mostrar Loader y bloquear botón
+            loader.style.display = 'flex';
+            submitBtn.disabled = true;
+            
+            // Obtener valores del formulario
+            const cedula = document.getElementById('cedula').value.trim();
+            const nombre = document.getElementById('nombre').value.trim();
+            const tipo_poliza = document.getElementById('tipo_poliza').value;
+            const hospital = document.getElementById('hospital').value;
+            const fc = parseInt(document.getElementById('fc').value) || 0;
+            const fr = parseInt(document.getElementById('fr').value) || 18;
+            const pas = parseInt(document.getElementById('pas').value) || 0;
+            const pad = parseInt(document.getElementById('pad').value) || 0;
+            const sintomas = document.getElementById('sintomas').value.trim();
+            
+            const payload = {
+                cedula,
+                nombre,
+                tipo_poliza,
+                hospital,
+                fc,
+                fr,
+                pas,
+                pad,
+                sato2: 97,
+                sintomas
+            };
+
+            try {
+                const response = await fetch('https://webhooks.datacoreecuadorcompetition.online/webhook/ingreso-emergencia', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error en servidor: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                displayResult(data, nombre, cedula, hospital);
+                
+            } catch (error) {
+                console.error("Error al enviar alerta:", error);
+                simulateLocalFallback(payload);
+            } finally {
+                loader.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Desplegar Dictamen AI en la SPA
+        function displayResult(data, nombre, cedula, hospital) {
+            console.log('📊 displayResult llamado con:', { data, nombre, cedula, hospital });
+
+            const placeholder = document.getElementById('placeholder-result');
+            const resultContainer = document.getElementById('result-container');
+            
+            console.log('🔍 placeholder:', placeholder);
+            console.log('🔍 result-container:', resultContainer);
+
+            if (placeholder) placeholder.style.display = 'none';
+            if (resultContainer) resultContainer.style.display = 'flex';
+            
+            // Si la respuesta viene del webhook real, dictamen estará dentro de data.dictamen
+            const dictamen = data.dictamen || data;
+            console.log('📋 dictamen extraído:', dictamen);
+            
+            // Datos del Paciente
+            const elNombre = document.getElementById('res-nombre');
+            const elCedula = document.getElementById('res-cedula');
+            const elNotifHospital = document.getElementById('res-notif-hospital');
+            
+            console.log('🔍 res-nombre:', elNombre);
+            console.log('🔍 res-cedula:', elCedula);
+            console.log('🔍 res-notif-hospital:', elNotifHospital);
+
+            if (elNombre) elNombre.innerText = nombre;
+            if (elCedula) elCedula.innerText = cedula;
+            if (elNotifHospital) elNotifHospital.innerText = `Notificación de ingreso despachada a ${hospital}.`;
+            
+            // Estado y Badge — todo en un solo innerHTML para evitar nulos
+            const badge = document.getElementById('res-badge');
+            console.log('🔍 res-badge:', badge);
+            
+            const estado = (dictamen.cobertura_estado || 'RECHAZADO').toUpperCase();
+            const estadoLabel = estado.replace(/_/g,' ');
+            console.log('✅ cobertura_estado:', estado);
+            
+            if (badge) {
+                badge.className = 'badge-main';
+                if (estado.includes('AUTORIZADO') || estado === 'APROBADO') {
+                    badge.classList.add('autorizado');
+                    badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${estadoLabel}</span>`;
+                } else if (estado.includes('AUDITORIA') || estado.includes('CARENCIA') || estado.includes('SUSPENDIDO')) {
+                    badge.classList.add('auditoria');
+                    badge.innerHTML = `<i class="fa-solid fa-clock"></i> <span>${estadoLabel}</span>`;
+                } else {
+                    badge.classList.add('rechazado');
+                    badge.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> <span>${estadoLabel}</span>`;
+                }
+            }
+            
+            // Análisis Clínico-Legal (viene del campo unificado de Gemini)
+            const analisis = dictamen.analisis_clinico_legal || dictamen.analisis_clinico || "Análisis clínico no disponible.";
+            console.log('🩺 analisis_clinico_legal:', analisis);
+            const elClinico = document.getElementById('res-clinico');
+            console.log('🔍 res-clinico:', elClinico);
+            if (elClinico) elClinico.innerText = analisis;
+            
+            // Panel Legal: alerta de bloqueo administrativo si existe
+            const legal = dictamen.alerta_bloqueo_administrativo
+                ? `⚠️ ALERTA LEGAL: ${dictamen.alerta_bloqueo_administrativo}`
+                : (dictamen.analisis_legal || "Sin alertas legales adicionales.");
+            console.log('⚖️ legal:', legal);
+            const elLegal = document.getElementById('res-legal');
+            console.log('🔍 res-legal:', elLegal);
+            if (elLegal) elLegal.innerText = legal;
+            
+            // Sublímite Banner
+            const sublimiteCard = document.getElementById('res-sublimite-card');
+            const sublimiteTitulo = document.getElementById('res-sublimite-titulo');
+            const sublimiteDesc = document.getElementById('res-sublimite-desc');
+            
+            console.log('🔍 res-sublimite-card:', sublimiteCard);
+
+            const sublimiteMonto = dictamen.sublimite_aplicado_usd || dictamen.cobertura_maxima_usd || 0;
+            console.log('💰 sublimiteMonto:', sublimiteMonto);
+            
+            if (sublimiteCard && sublimiteMonto && parseFloat(sublimiteMonto) > 0) {
+                sublimiteCard.style.display = 'flex';
+                if (sublimiteTitulo) sublimiteTitulo.innerText = `Sublímite Aplicado: $${parseFloat(sublimiteMonto).toLocaleString('es-EC')} USD`;
+                if (sublimiteDesc) sublimiteDesc.innerText = dictamen.sublimite_razon || "Aplica limitación regulatoria según ley ecuatoriana vigente (Art. 34 Ley Medicina Prepagada).";
+            } else if (sublimiteCard) {
+                sublimiteCard.style.display = 'none';
+            }
+
+            console.log('✅ displayResult completado exitosamente.');
+        }
+
+        // Simulación en el cliente para pruebas instantáneas (Contingencia / Mockups)
+        function simulateLocalFallback(payload) {
+            console.log('🔄 simulateLocalFallback activado para cédula:', payload.cedula);
+            let dictamen = {};
+            
+            if (payload.cedula === '1724567890') {
+                dictamen = {
+                    cobertura_estado: 'AUTORIZADO_INMEDIATO',
+                    emergencia_calificada: true,
+                    poliza_activa: true,
+                    analisis_clinico_legal: 'Paciente con síntomas patognomónicos de cetoacidosis diabética aguda (aliento cetónico, FC 105, dolor abdominal). Constituye una EMERGENCIA CLÍNICA CRÍTICA. No se puede negar la atención inicial inmediata. Aplicando el Artículo 34 de la Ley Orgánica que Regula las Compañías de Medicina Prepagada — con más de 24 meses de vigencia activa, se aplica sublímite obligatorio de 20 SBU ($9,200.00 USD).',
+                    alerta_bloqueo_administrativo: 'Art. 8 Ley Derechos del Paciente: PROHIBIDO exigir garantías económicas. Art. 13: pena de 12-18 meses de prisión por negar atención de emergencia.',
+                    sublimite_aplicado_usd: 9200.00,
+                    sublimite_razon: 'Sublímite Legal Obligatorio por Preexistencia de Diabetes (Art. 34 Ley Medicina Prepagada).'
+                };
+            } else if (payload.cedula === '1751234567') {
+                dictamen = {
+                    cobertura_estado: 'SUSPENDIDO_AUDITORIA',
+                    emergencia_calificada: true,
+                    poliza_activa: true,
+                    analisis_clinico_legal: 'Cuadro agudo sugerente de apendicitis. Signos vitales estables pero dolor agudo. Requiere resolución quirúrgica urgente. La póliza tiene únicamente 3 meses de vigencia — el período de carencia de 24 meses no ha sido superado. Caso entra a auditoría de emergencia.',
+                    alerta_bloqueo_administrativo: 'Art. 8 Ley Derechos del Paciente: La atención no puede negarse por razones económicas. Caso en AUDITORÍA pendiente.',
+                    sublimite_aplicado_usd: 0
+                };
+            } else if (payload.cedula === '0918765432') {
+                dictamen = {
+                    cobertura_estado: 'RECHAZADO_POR_EXCLUSION',
+                    emergencia_calificada: false,
+                    poliza_activa: true,
+                    analisis_clinico_legal: 'Fractura expuesta de pierna izquierda tras accidente vehicular. La anamnesis indica síncope vaso-vagal (R55) como nexo causal previo al choque. Art. 2 de exclusiones del contrato de Aseguradora del Sur: los accidentes derivados de patologías preexistentes (síncope) están EXCLUIDOS de cobertura.',
+                    alerta_bloqueo_administrativo: null,
+                    sublimite_aplicado_usd: 0
+                };
+            } else {
+                dictamen = {
+                    cobertura_estado: 'RECHAZADO',
+                    emergencia_calificada: false,
+                    poliza_activa: false,
+                    analisis_clinico_legal: 'Luxación de muñeca simple. Signos vitales normales. Urgencia Menor, no compromete la vida. Póliza corporativa reporta estado INACTIVA por falta de renovación/pago del empleador. Sin cobertura activa.',
+                    alerta_bloqueo_administrativo: null,
+                    sublimite_aplicado_usd: 0
+                };
+            }
+
+            console.log('📦 dictamen fallback construido:', dictamen);
+            
+            // Envolver en la estructura que espera displayResult
+            displayResult({ dictamen }, payload.nombre, payload.cedula, payload.hospital);
+        }
+    </script>
+</body>
+</html>
